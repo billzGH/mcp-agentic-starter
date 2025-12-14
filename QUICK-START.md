@@ -7,9 +7,21 @@
 git clone [your-repo-url]
 cd mcp-agentic-starter
 
-# 2. Install dependencies
-python -m venv venv
-source venv/bin/activate
+# 2. Install UV (Python package manager) and dependencies
+# Mac/Linux:
+brew install uv
+# Or visit: https://github.com/astral-sh/uv
+
+# OR for Node.js examples
+npm install
+
+# Activate it
+# On Mac/Linux:
+source .venv/bin/activate
+# On Windows:
+venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 
 # 3. Generate sample data

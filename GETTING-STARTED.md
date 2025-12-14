@@ -16,12 +16,17 @@ This guide will get you up and running with your first MCP server and agentic wo
 git clone https://github.com/yourusername/mcp-agentic-starter.git
 cd mcp-agentic-starter
 
-# Create Python virtual environment
-python -m venv venv
+# Install UV (Python package manager)
+# Mac/Linux:
+brew install uv
+# Or visit: https://github.com/astral-sh/uv
+
+# OR for Node.js examples
+npm install
 
 # Activate it
 # On Mac/Linux:
-source venv/bin/activate
+source .venv/bin/activate
 # On Windows:
 venv\Scripts\activate
 

@@ -19,8 +19,16 @@ This prevents accidental access to sensitive system files.
 ## Installation
 
 ```bash
-# Install dependencies
-pip install mcp anthropic-mcp
+# Install UV (Python package manager)
+# Mac/Linux:
+brew install uv
+# Or visit: https://github.com/astral-sh/uv
+
+# Install dependencies with UV
+uv pip install -r requirements.txt
+
+# OR for Node.js examples
+npm install
 
 # Test the server
 python server.py
