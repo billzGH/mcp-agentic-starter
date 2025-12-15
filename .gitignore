@@ -45,7 +45,8 @@ datasets/sales/*.csv
 datasets/sales/*.json
 datasets/**/*.csv
 datasets/**/*.json
-# Keep the README files
+
+# Keep the README.md file
 !datasets/**/README.md
 
 # IDE
