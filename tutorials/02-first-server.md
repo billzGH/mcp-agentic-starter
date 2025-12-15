@@ -30,7 +30,7 @@ cd task-manager-mcp
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install mcp
+uv pip install mcp
 ```
 
 ### Step 3: Create Main Server File

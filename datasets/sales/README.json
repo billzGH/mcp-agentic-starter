@@ -1,12 +1,12 @@
 {
-  "generated_at": "2025-12-13T22:18:51.213531",
+  "generated_at": "2025-12-15T13:32:32.445385",
   "num_customers": 1000,
-  "num_products": 42,
+  "num_products": 37,
   "num_transactions": 10000,
   "date_range": {
-    "start": "2024-12-13",
-    "end": "2025-12-13"
+    "start": "2024-12-15",
+    "end": "2025-12-15"
   },
-  "total_revenue": 7893277.610000033,
+  "total_revenue": 7926450.34,
   "description": "Synthetic e-commerce sales data for testing and learning"
 }

@@ -17,28 +17,22 @@ git clone https://github.com/yourusername/mcp-agentic-starter.git
 cd mcp-agentic-starter
 
 # Install UV (Python package manager)
-# Mac/Linux:
+# Mac:
 brew install uv
-# Or visit: https://github.com/astral-sh/uv
+# Linux:
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Windows:
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# OR for Node.js examples
-npm install
-
-# Activate it
-# On Mac/Linux:
-source .venv/bin/activate
-# On Windows:
-venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies with UV
+uv pip install -r requirements.txt
 ```
 
 ## Step 2: Generate Sample Data (2 minutes)
 
 ```bash
 cd examples/data-analysis
-python generate_sales_data.py
+uv run generate_sales_data.py
 ```
 
 This creates realistic e-commerce data in `datasets/sales/`:
@@ -50,18 +44,19 @@ This creates realistic e-commerce data in `datasets/sales/`:
 ## Step 3: Test the Data Analysis Server (5 minutes)
 
 ```bash
-# Test the server locally
-python server.py
+# Test the server locally - it should start without errors
+uv run server.py
 ```
 
-In another terminal:
+The server will start and wait for input from Claude Desktop. If it starts without any errors, it's working correctly! Press Ctrl+C to stop it.
 
-```bash
-# The server should respond to MCP protocol messages
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | python server.py
-```
+**What success looks like:**
 
-If you see a response, the server works! Press Ctrl+C to stop it.
+- No error messages
+- Server is waiting (you can see the cursor blinking)
+- No "ModuleNotFoundError" or import errors
+
+If you see any errors, check the [Troubleshooting Guide](TROUBLESHOOTING.md).
 
 ## Step 4: Connect to Claude Desktop (10 minutes)
 
@@ -78,7 +73,36 @@ Add your MCP server:
 {
   "mcpServers": {
     "data-analysis": {
-      "command": "python",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/FULL/PATH/TO/mcp-agentic-starter/examples/data-analysis",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+
+**Important**: Replace `/FULL/PATH/TO/` with your actual path.
+
+To find your full path:
+
+```bash
+# Run this in your project directory:
+cd ~/git/mcp-agentic-starter/examples/data-analysis
+pwd
+# Copy the output and use it in your config
+```
+
+**Alternative (using python3 directly)**:
+
+```json
+{
+  "mcpServers": {
+    "data-analysis": {
+      "command": "python3",
       "args": [
         "/FULL/PATH/TO/mcp-agentic-starter/examples/data-analysis/server.py"
       ]
@@ -87,15 +111,7 @@ Add your MCP server:
 }
 ```
 
-**Important**: Use the FULL absolute path! Replace `/FULL/PATH/TO/` with your actual path.
-
-To find your full path:
-
-```bash
-# Run this in your project directory:
-pwd
-# Copy the output and use it in your config
-```
+Note: This requires `mcp` to be installed in your system Python 3.12+ or a virtual environment that python3 uses.
 
 ### Restart Claude Desktop
 
@@ -107,29 +123,36 @@ Open Claude Desktop and try these prompts:
 
 ### Test 1: Check Connection
 
+```plaintext
 Do you have access to data analysis tools?
+```
 
 Claude should confirm it can see the tools.
 
 ### Test 2: Explore Data
 
+```plaintext
 What data files are available?
+```
 
 You should see your sales data files listed.
 
 ### Test 3: Basic Analysis
 
+```plaintext
 Give me a summary of the customers.csv file
+```
 
 Claude will analyze the customer data.
 
 ### Test 4: Real Analysis
 
+```plaintext
 Analyze the transactions data:
-
 1. What's the total revenue?
 2. What are the top 5 products by sales?
 3. Which region has the highest sales?
+```
 
 Claude will use multiple tool calls to answer these questions!
 
@@ -139,30 +162,33 @@ Now try some agentic workflows:
 
 ### Exploratory Analysis
 
+```plaintext
 I'm new to this sales data. Help me understand:
-
 - What time period does it cover?
 - What's the average transaction value?
 - Are there any interesting patterns?
+```
 
 ### Customer Segmentation
 
+```plaintext
 Analyze customers and group them into:
-
 - High value (>$1000 total spend)
 - Medium value ($500-$1000)
 - Low value (<$500)
 
 How many are in each segment?
+```
 
 ### Product Performance
 
+```plaintext
 Find products with:
-
 - High revenue but low ratings
 - Low stock quantities (<50)
 
 Which ones should we focus on?
+```
 
 ## Understanding What Just Happened
 
@@ -196,10 +222,10 @@ This is **agentic AI** - Claude autonomously using tools to accomplish goals!
 
 **Solutions**:
 
-1. Verify your virtual environment is active
-2. Check file paths in server.py are correct
-3. Run server manually to see errors: `python server.py`
-4. Check datasets exist: `ls ../../datasets/sales/`
+1. Check file paths in server.py are correct
+2. Run server manually to see errors: `uv run server.py`
+3. Check datasets exist: `ls ../../datasets/sales/`
+4. Verify UV is using the correct Python: `uv run python --version`
 
 ### Import Errors
 
@@ -207,9 +233,12 @@ This is **agentic AI** - Claude autonomously using tools to accomplish goals!
 
 **Solutions**:
 
-1. Activate your virtual environment
-2. Reinstall: `pip install -r requirements.txt`
-3. Check Python version: `python --version` (needs 3.10+)
+1. Ensure UV is installed: `uv --version`
+2. Reinstall: `uv pip install -r requirements.txt`
+3. Check Python version: `python3 --version` (needs 3.10+)
+4. Use `uv run server.py` instead of `python server.py`
+5. If using `python3` directly, make sure it points to Python 3.10+ with `mcp` installed
+6. Check which Python: `which python3` and verify it's using the right version
 
 ## What's Next?
 
@@ -242,20 +271,21 @@ This is **agentic AI** - Claude autonomously using tools to accomplish goals!
 ### Useful Commands
 
 ```bash
-# Activate environment
-source venv/bin/activate
+# Install dependencies
+uv pip install -r requirements.txt
 
-# Run server manually
-python examples/data-analysis/server.py
+# Run server manually (should start without errors)
+uv run server.py
 
 # Generate new sample data
-python examples/data-analysis/generate_sales_data.py
-
-# Check if server is working
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | python server.py
+uv run generate_sales_data.py
 
 # View logs
 tail -f ~/Library/Logs/Claude/mcp-*.log
+
+# Check UV and Python versions
+uv --version
+uv run python --version
 ```
 
 ### Config File Locations

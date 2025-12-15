@@ -1,117 +1,260 @@
 #!/usr/bin/env python3
 """
-Simple File System MCP Server
-Allows Claude to read, write, and search files in a designated directory
+Data Analysis MCP Server
+Allows Claude to analyze CSV/JSON data files
 """
 
+import json
+import csv
 import asyncio
-import os
 from pathlib import Path
-from typing import Any, List
+from typing import Any, Dict, List
+import statistics
+from collections import Counter, defaultdict
+
 from mcp.server import Server
 from mcp.types import Tool, TextContent
 
-# Configure safe working directory
-WORK_DIR = Path.home() / "Documents" / "claude-workspace"
-WORK_DIR.mkdir(parents=True, exist_ok=True)
+# Initialize server
+server = Server("data-analysis")
 
-server = Server("filesystem")
+class DataAnalyzer:
+    """Analyze CSV and JSON data files"""
+    
+    def __init__(self, data_dir: str = "../../datasets"):
+        self.data_dir = Path(data_dir)
+    
+    def list_files(self) -> List[Dict[str, Any]]:
+        """List available data files"""
+        files = []
+        for ext in ['*.csv', '*.json']:
+            for file in self.data_dir.rglob(ext):
+                files.append({
+                    "path": str(file.relative_to(self.data_dir)),
+                    "name": file.name,
+                    "size": file.stat().st_size,
+                    "type": file.suffix
+                })
+        return files
+    
+    def load_csv(self, filepath: str) -> List[Dict]:
+        """Load CSV file"""
+        full_path = self.data_dir / filepath
+        with open(full_path, 'r') as f:
+            return list(csv.DictReader(f))
+    
+    def load_json(self, filepath: str) -> Any:
+        """Load JSON file"""
+        full_path = self.data_dir / filepath
+        with open(full_path, 'r') as f:
+            return json.load(f)
+    
+    def get_summary(self, filepath: str) -> Dict:
+        """Get summary statistics for a file"""
+        if filepath.endswith('.csv'):
+            data = self.load_csv(filepath)
+        else:
+            data = self.load_json(filepath)
+        
+        if not data:
+            return {"error": "No data found"}
+        
+        # Basic stats
+        summary = {
+            "num_records": len(data),
+            "columns": list(data[0].keys()) if isinstance(data[0], dict) else [],
+            "sample_record": data[0] if data else None
+        }
+        
+        # Column type analysis
+        if summary["columns"]:
+            column_types = {}
+            for col in summary["columns"]:
+                values = [row[col] for row in data if col in row]
+                column_types[col] = self._infer_type(values)
+            summary["column_types"] = column_types
+        
+        return summary
+    
+    def _infer_type(self, values: List) -> str:
+        """Infer the type of a column"""
+        non_empty = [v for v in values if v and str(v).strip()]
+        if not non_empty:
+            return "empty"
+        
+        sample = non_empty[0]
+        try:
+            float(sample)
+            return "numeric"
+        except (ValueError, TypeError):
+            return "text"
+    
+    def analyze_column(self, filepath: str, column: str) -> Dict:
+        """Analyze a specific column"""
+        if filepath.endswith('.csv'):
+            data = self.load_csv(filepath)
+        else:
+            data = self.load_json(filepath)
+        
+        values = [row[column] for row in data if column in row]
+        
+        # Try numeric analysis
+        try:
+            numeric_values = [float(v) for v in values if v and str(v).strip()]
+            return {
+                "column": column,
+                "type": "numeric",
+                "count": len(numeric_values),
+                "min": min(numeric_values),
+                "max": max(numeric_values),
+                "mean": statistics.mean(numeric_values),
+                "median": statistics.median(numeric_values),
+                "stdev": statistics.stdev(numeric_values) if len(numeric_values) > 1 else 0
+            }
+        except (ValueError, TypeError):
+            # Text analysis
+            text_values = [str(v) for v in values if v]
+            counter = Counter(text_values)
+            return {
+                "column": column,
+                "type": "text",
+                "count": len(text_values),
+                "unique_values": len(counter),
+                "most_common": counter.most_common(10),
+                "sample_values": list(set(text_values))[:10]
+            }
+    
+    def filter_data(self, filepath: str, conditions: List[Dict]) -> List[Dict]:
+        """Filter data based on conditions"""
+        if filepath.endswith('.csv'):
+            data = self.load_csv(filepath)
+        else:
+            data = self.load_json(filepath)
+        
+        filtered = data
+        for condition in conditions:
+            column = condition['column']
+            operator = condition['operator']
+            value = condition['value']
+            
+            if operator == '==':
+                filtered = [row for row in filtered if str(row.get(column)) == str(value)]
+            elif operator == '>':
+                filtered = [row for row in filtered if float(row.get(column, 0)) > float(value)]
+            elif operator == '<':
+                filtered = [row for row in filtered if float(row.get(column, 0)) < float(value)]
+            elif operator == 'contains':
+                filtered = [row for row in filtered if value.lower() in str(row.get(column, '')).lower()]
+        
+        return filtered
+    
+    def aggregate(self, filepath: str, group_by: str, agg_column: str, agg_func: str) -> Dict:
+        """Aggregate data by a column"""
+        if filepath.endswith('.csv'):
+            data = self.load_csv(filepath)
+        else:
+            data = self.load_json(filepath)
+        
+        groups = defaultdict(list)
+        for row in data:
+            key = row.get(group_by, 'Unknown')
+            value = row.get(agg_column)
+            if value:
+                try:
+                    groups[key].append(float(value))
+                except (ValueError, TypeError):
+                    pass
+        
+        results = {}
+        for key, values in groups.items():
+            if agg_func == 'sum':
+                results[key] = sum(values)
+            elif agg_func == 'avg':
+                results[key] = statistics.mean(values)
+            elif agg_func == 'count':
+                results[key] = len(values)
+            elif agg_func == 'min':
+                results[key] = min(values)
+            elif agg_func == 'max':
+                results[key] = max(values)
+        
+        return {
+            "grouped_by": group_by,
+            "aggregated": agg_column,
+            "function": agg_func,
+            "results": dict(sorted(results.items(), key=lambda x: x[1], reverse=True))
+        }
 
-def is_safe_path(path: str) -> bool:
-    """Check if path is within allowed directory"""
-    try:
-        resolved = (WORK_DIR / path).resolve()
-        return resolved.is_relative_to(WORK_DIR)
-    except (ValueError, RuntimeError):
-        return False
+analyzer = DataAnalyzer()
 
 @server.list_tools()
 async def list_tools() -> List[Tool]:
     """Define available tools"""
     return [
         Tool(
-            name="read_file",
-            description="Read contents of a file",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "Path to file (relative to workspace)"
-                    }
-                },
-                "required": ["path"]
-            }
-        ),
-        Tool(
-            name="write_file",
-            description="Write content to a file (creates if doesn't exist)",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "Path to file (relative to workspace)"
-                    },
-                    "content": {
-                        "type": "string",
-                        "description": "Content to write"
-                    }
-                },
-                "required": ["path", "content"]
-            }
-        ),
-        Tool(
-            name="list_files",
-            description="List files in a directory",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "Directory path (relative to workspace, default: root)",
-                        "default": "."
-                    }
-                }
-            }
-        ),
-        Tool(
-            name="search_files",
-            description="Search for files by name or content",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "Search query (filename or content)"
-                    },
-                    "search_content": {
-                        "type": "boolean",
-                        "description": "Search file contents (default: false)",
-                        "default": False
-                    }
-                },
-                "required": ["query"]
-            }
-        ),
-        Tool(
-            name="delete_file",
-            description="Delete a file",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "Path to file (relative to workspace)"
-                    }
-                },
-                "required": ["path"]
-            }
-        ),
-        Tool(
-            name="get_workspace_info",
-            description="Get information about the workspace directory",
+            name="list_data_files",
+            description="List all available data files (CSV and JSON)",
             inputSchema={"type": "object", "properties": {}}
+        ),
+        Tool(
+            name="get_data_summary",
+            description="Get summary statistics and column info for a data file",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "filepath": {"type": "string", "description": "Path to data file (e.g., 'sales/customers.csv')"}
+                },
+                "required": ["filepath"]
+            }
+        ),
+        Tool(
+            name="analyze_column",
+            description="Analyze a specific column (get stats, distributions, etc.)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "filepath": {"type": "string", "description": "Path to data file"},
+                    "column": {"type": "string", "description": "Column name to analyze"}
+                },
+                "required": ["filepath", "column"]
+            }
+        ),
+        Tool(
+            name="filter_data",
+            description="Filter data based on conditions",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "filepath": {"type": "string", "description": "Path to data file"},
+                    "conditions": {
+                        "type": "array",
+                        "description": "List of filter conditions",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "column": {"type": "string"},
+                                "operator": {"type": "string", "enum": ["==", ">", "<", "contains"]},
+                                "value": {"type": "string"}
+                            }
+                        }
+                    }
+                },
+                "required": ["filepath", "conditions"]
+            }
+        ),
+        Tool(
+            name="aggregate_data",
+            description="Group and aggregate data (sum, avg, count, min, max)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "filepath": {"type": "string", "description": "Path to data file"},
+                    "group_by": {"type": "string", "description": "Column to group by"},
+                    "agg_column": {"type": "string", "description": "Column to aggregate"},
+                    "agg_func": {"type": "string", "enum": ["sum", "avg", "count", "min", "max"]}
+                },
+                "required": ["filepath", "group_by", "agg_column", "agg_func"]
+            }
         )
     ]
 
@@ -120,126 +263,67 @@ async def call_tool(name: str, arguments: Any) -> List[TextContent]:
     """Handle tool calls"""
     
     try:
-        if name == "read_file":
-            path = arguments["path"]
-            if not is_safe_path(path):
-                return [TextContent(type="text", text="Error: Path outside workspace")]
-            
-            file_path = WORK_DIR / path
-            if not file_path.exists():
-                return [TextContent(type="text", text=f"Error: File not found: {path}")]
-            
-            content = file_path.read_text()
-            return [TextContent(type="text", text=content)]
+        if name == "list_data_files":
+            files = analyzer.list_files()
+            message = f"Found {len(files)} data files:\n\n"
+            for file in files:
+                size_kb = file['size'] / 1024
+                message += f"📄 {file['path']} ({size_kb:.1f} KB)\n"
+            return [TextContent(type="text", text=message)]
         
-        elif name == "write_file":
-            path = arguments["path"]
-            content = arguments["content"]
-            
-            if not is_safe_path(path):
-                return [TextContent(type="text", text="Error: Path outside workspace")]
-            
-            file_path = WORK_DIR / path
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            file_path.write_text(content)
-            
-            return [TextContent(type="text", text=f"✓ Wrote to {path}")]
+        elif name == "get_data_summary":
+            summary = analyzer.get_summary(arguments["filepath"])
+            message = f"📊 Summary of {arguments['filepath']}:\n\n"
+            message += f"Records: {summary['num_records']}\n"
+            message += f"Columns: {', '.join(summary['columns'])}\n\n"
+            if 'column_types' in summary:
+                message += "Column Types:\n"
+                for col, typ in summary['column_types'].items():
+                    message += f"  • {col}: {typ}\n"
+            return [TextContent(type="text", text=message)]
         
-        elif name == "list_files":
-            path = arguments.get("path", ".")
-            if not is_safe_path(path):
-                return [TextContent(type="text", text="Error: Path outside workspace")]
+        elif name == "analyze_column":
+            result = analyzer.analyze_column(arguments["filepath"], arguments["column"])
+            message = f"📈 Analysis of '{result['column']}':\n\n"
+            message += f"Type: {result['type']}\n"
+            message += f"Count: {result['count']}\n\n"
             
-            dir_path = WORK_DIR / path
-            if not dir_path.exists():
-                return [TextContent(type="text", text=f"Error: Directory not found: {path}")]
-            
-            files = []
-            dirs = []
-            for item in sorted(dir_path.iterdir()):
-                if item.is_file():
-                    size = item.stat().st_size
-                    files.append(f"  📄 {item.name} ({size} bytes)")
-                else:
-                    dirs.append(f"  📁 {item.name}/")
-            
-            result = f"Contents of {path}:\n\n"
-            if dirs:
-                result += "\n".join(dirs) + "\n"
-            if files:
-                result += "\n".join(files)
-            if not dirs and not files:
-                result += "(empty directory)"
-            
-            return [TextContent(type="text", text=result)]
-        
-        elif name == "search_files":
-            query = arguments["query"].lower()
-            search_content = arguments.get("search_content", False)
-            
-            matches = []
-            for file_path in WORK_DIR.rglob("*"):
-                if not file_path.is_file():
-                    continue
-                
-                # Search filename
-                if query in file_path.name.lower():
-                    rel_path = file_path.relative_to(WORK_DIR)
-                    matches.append(f"📄 {rel_path} (filename match)")
-                    continue
-                
-                # Search content if requested
-                if search_content:
-                    try:
-                        content = file_path.read_text()
-                        if query in content.lower():
-                            rel_path = file_path.relative_to(WORK_DIR)
-                            matches.append(f"📄 {rel_path} (content match)")
-                    except (UnicodeDecodeError, PermissionError):
-                        pass
-            
-            if matches:
-                result = f"Found {len(matches)} matches for '{query}':\n\n"
-                result += "\n".join(matches[:20])
-                if len(matches) > 20:
-                    result += f"\n\n(showing first 20 of {len(matches)} matches)"
+            if result['type'] == 'numeric':
+                message += f"Min: {result['min']:.2f}\n"
+                message += f"Max: {result['max']:.2f}\n"
+                message += f"Mean: {result['mean']:.2f}\n"
+                message += f"Median: {result['median']:.2f}\n"
+                message += f"Std Dev: {result['stdev']:.2f}\n"
             else:
-                result = f"No matches found for '{query}'"
+                message += f"Unique Values: {result['unique_values']}\n\n"
+                message += "Most Common:\n"
+                for value, count in result['most_common'][:5]:
+                    message += f"  • {value}: {count}\n"
             
-            return [TextContent(type="text", text=result)]
+            return [TextContent(type="text", text=message)]
         
-        elif name == "delete_file":
-            path = arguments["path"]
-            if not is_safe_path(path):
-                return [TextContent(type="text", text="Error: Path outside workspace")]
-            
-            file_path = WORK_DIR / path
-            if not file_path.exists():
-                return [TextContent(type="text", text=f"Error: File not found: {path}")]
-            
-            file_path.unlink()
-            return [TextContent(type="text", text=f"✓ Deleted {path}")]
+        elif name == "filter_data":
+            filtered = analyzer.filter_data(arguments["filepath"], arguments["conditions"])
+            message = f"🔍 Filtered {len(filtered)} records\n\n"
+            if filtered:
+                message += "Sample results:\n"
+                for row in filtered[:5]:
+                    message += f"{json.dumps(row, indent=2)}\n\n"
+            return [TextContent(type="text", text=message)]
         
-        elif name == "get_workspace_info":
-            total_files = sum(1 for _ in WORK_DIR.rglob("*") if _.is_file())
-            total_dirs = sum(1 for _ in WORK_DIR.rglob("*") if _.is_dir())
-            
-            info = f"""
-📁 Workspace Information:
-
-Location: {WORK_DIR}
-Files: {total_files}
-Directories: {total_dirs}
-
-You can:
-• Read and write files
-• List directory contents
-• Search for files
-• Delete files
-
-All paths are relative to the workspace root.
-"""
-            return [TextContent(type="text", text=info)]
+        elif name == "aggregate_data":
+            result = analyzer.aggregate(
+                arguments["filepath"],
+                arguments["group_by"],
+                arguments["agg_column"],
+                arguments["agg_func"]
+            )
+            message = f"📊 Aggregation Results:\n\n"
+            message += f"Grouped by: {result['grouped_by']}\n"
+            message += f"Function: {result['function']} of {result['aggregated']}\n\n"
+            for key, value in list(result['results'].items())[:10]:
+                message += f"{key}: {value:.2f}\n"
+            return [TextContent(type="text", text=message)]
         
         else:
             raise ValueError(f"Unknown tool: {name}")

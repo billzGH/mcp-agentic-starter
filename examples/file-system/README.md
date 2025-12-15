@@ -31,7 +31,7 @@ uv pip install -r requirements.txt
 npm install
 
 # Test the server
-python server.py
+uv run server.py
 ```
 
 ## Configuration

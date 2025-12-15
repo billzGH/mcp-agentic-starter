@@ -22,11 +22,11 @@ source .venv/bin/activate
 venv\Scripts\activate
 
 # Install dependencies
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 
 # 3. Generate sample data
 cd examples/data-analysis
-python generate_sales_data.py
+uv run generate_sales_data.py
 
 # 4. Configure Claude Desktop
 # Edit: ~/Library/Application Support/Claude/claude_desktop_config.json
@@ -116,7 +116,7 @@ Search for files containing "meeting"
 
 - Activate virtual environment
 - Verify dependencies installed
-- Test server manually: `python server.py`
+- Test server manually: `uv run server.py`
 
 ## 📚 Next Steps
 

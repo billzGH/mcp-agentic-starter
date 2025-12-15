@@ -24,7 +24,7 @@ The sample data files are **NOT** included in the repository by design. This all
 
 ```bash
 cd examples/data-analysis
-python generate_sales_data.py
+uv run generate_sales_data.py
 ```
 
 This will create:

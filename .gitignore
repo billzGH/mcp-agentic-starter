@@ -47,7 +47,6 @@ datasets/**/*.csv
 datasets/**/*.json
 # Keep the README files
 !datasets/**/README.md
-!datasets/**/README.json
 
 # IDE
 .vscode/
