@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 MCP Documentation
+    url: https://modelcontextprotocol.io/docs
+    about: Official Model Context Protocol documentation
+  - name: 💬 Anthropic Discord
+    url: https://discord.gg/anthropic
+    about: Join the Anthropic Discord for real-time help
