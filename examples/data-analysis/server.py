@@ -184,6 +184,63 @@ class DataAnalyzer:
             "function": agg_func,
             "results": dict(sorted(results.items(), key=lambda x: x[1], reverse=True))
         }
+    
+    def join_and_aggregate(self, left_file: str, right_file: str, join_key: str, 
+                          group_by: str, agg_column: str, agg_func: str) -> Dict:
+        """Join two files and aggregate the result"""
+        # Load both files
+        if left_file.endswith('.csv'):
+            left_data = self.load_csv(left_file)
+        else:
+            left_data = self.load_json(left_file)
+            
+        if right_file.endswith('.csv'):
+            right_data = self.load_csv(right_file)
+        else:
+            right_data = self.load_json(right_file)
+        
+        # Create lookup dict from right data
+        right_lookup = {row[join_key]: row for row in right_data}
+        
+        # Join data
+        joined = []
+        for left_row in left_data:
+            key = left_row.get(join_key)
+            if key in right_lookup:
+                merged_row = {**left_row, **right_lookup[key]}
+                joined.append(merged_row)
+        
+        # Aggregate joined data
+        groups = defaultdict(list)
+        for row in joined:
+            key = row.get(group_by, 'Unknown')
+            value = row.get(agg_column)
+            if value:
+                try:
+                    groups[key].append(float(value))
+                except (ValueError, TypeError):
+                    pass
+        
+        results = {}
+        for key, values in groups.items():
+            if agg_func == 'sum':
+                results[key] = sum(values)
+            elif agg_func == 'avg':
+                results[key] = statistics.mean(values)
+            elif agg_func == 'count':
+                results[key] = len(values)
+            elif agg_func == 'min':
+                results[key] = min(values)
+            elif agg_func == 'max':
+                results[key] = max(values)
+        
+        return {
+            "joined_records": len(joined),
+            "grouped_by": group_by,
+            "aggregated": agg_column,
+            "function": agg_func,
+            "results": dict(sorted(results.items(), key=lambda x: x[1], reverse=True))
+        }
 
 analyzer = DataAnalyzer()
 
@@ -255,6 +312,22 @@ async def list_tools() -> List[Tool]:
                 },
                 "required": ["filepath", "group_by", "agg_column", "agg_func"]
             }
+        ),
+        Tool(
+            name="join_and_aggregate",
+            description="Join two data files and aggregate the results (e.g., join transactions with customers to analyze by region)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "left_file": {"type": "string", "description": "Path to first data file"},
+                    "right_file": {"type": "string", "description": "Path to second data file"},
+                    "join_key": {"type": "string", "description": "Column name to join on (must exist in both files)"},
+                    "group_by": {"type": "string", "description": "Column to group by (from either file)"},
+                    "agg_column": {"type": "string", "description": "Column to aggregate (from either file)"},
+                    "agg_func": {"type": "string", "enum": ["sum", "avg", "count", "min", "max"]}
+                },
+                "required": ["left_file", "right_file", "join_key", "group_by", "agg_column", "agg_func"]
+            }
         )
     ]
 
@@ -319,6 +392,23 @@ async def call_tool(name: str, arguments: Any) -> List[TextContent]:
                 arguments["agg_func"]
             )
             message = f"📊 Aggregation Results:\n\n"
+            message += f"Grouped by: {result['grouped_by']}\n"
+            message += f"Function: {result['function']} of {result['aggregated']}\n\n"
+            for key, value in list(result['results'].items())[:10]:
+                message += f"{key}: {value:.2f}\n"
+            return [TextContent(type="text", text=message)]
+        
+        elif name == "join_and_aggregate":
+            result = analyzer.join_and_aggregate(
+                arguments["left_file"],
+                arguments["right_file"],
+                arguments["join_key"],
+                arguments["group_by"],
+                arguments["agg_column"],
+                arguments["agg_func"]
+            )
+            message = f"🔗 Join and Aggregation Results:\n\n"
+            message += f"Joined {result['joined_records']} records\n"
             message += f"Grouped by: {result['grouped_by']}\n"
             message += f"Function: {result['function']} of {result['aggregated']}\n\n"
             for key, value in list(result['results'].items())[:10]:
