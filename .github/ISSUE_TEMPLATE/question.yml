@@ -1,82 +1,64 @@
-name: Feature Request
-description: Suggest a new tutorial, server, or feature
-title: "[FEATURE] "
-labels: ["enhancement"]
+name: Question / Help
+description: Ask a question about MCP development or using the tutorials
+title: "[QUESTION] "
+labels: ["question"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for suggesting a new feature! Please provide details below.
-  
-  - type: checkboxes
-    id: feature-type
-    attributes:
-      label: Feature Type
-      description: What kind of feature are you requesting?
-      options:
-        - label: New tutorial
-        - label: New MCP server example
-        - label: Enhancement to existing tutorial/server
-        - label: Documentation improvement
-        - label: Other
+        Need help? Ask your question below and we'll do our best to assist!
   
   - type: textarea
-    id: feature-description
+    id: question
     attributes:
-      label: Feature Description
-      description: A clear and concise description of what you want
-      placeholder: Describe the feature you'd like to see
+      label: Question
+      description: What would you like help with?
+      placeholder: Describe your question or what you're trying to accomplish
     validations:
       required: true
   
   - type: textarea
-    id: use-case
+    id: what-tried
     attributes:
-      label: Use Case
-      description: Describe the problem this feature would solve or the workflow it would enable
-      placeholder: What problem does this solve? How would you use this?
+      label: What I've Tried
+      description: What have you already attempted?
+      placeholder: Describe what you've tried so far
     validations:
       required: true
   
-  - type: textarea
-    id: proposed-solution
+  - type: input
+    id: os
     attributes:
-      label: Proposed Solution
-      description: How do you envision this working?
-      placeholder: Describe your ideal implementation
-    validations:
-      required: true
+      label: Operating System
+      description: If relevant
+      placeholder: macOS 14.1
+  
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: If relevant
+      placeholder: "3.12.0"
+  
+  - type: input
+    id: tutorial-server
+    attributes:
+      label: Tutorial/Server
+      description: Which tutorial or server is this related to?
+      placeholder: Tutorial 1, Data Analysis Server, etc.
   
   - type: textarea
-    id: example-code
+    id: code-config
     attributes:
-      label: Example Code/Configuration
-      description: If applicable, provide pseudo-code or configuration examples
+      label: Code/Configuration (if relevant)
+      description: Share any relevant code or configuration
       render: python
       placeholder: |
-        # Your example here
-        def example():
-            pass
-  
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives Considered
-      description: What other solutions or approaches have you thought about?
-      placeholder: Describe alternative approaches
+        # Paste relevant code here
   
   - type: textarea
     id: additional-context
     attributes:
       label: Additional Context
-      description: Add any other context, screenshots, or links to similar implementations
-      placeholder: Any additional information
-  
-  - type: checkboxes
-    id: contribution
-    attributes:
-      label: Would you be willing to contribute?
-      options:
-        - label: Yes, I can submit a PR for this
-        - label: Maybe, with guidance
-        - label: No, but I can help test
+      description: Any other information that might be helpful
+      placeholder: Any additional details
