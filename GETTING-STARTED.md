@@ -25,7 +25,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
 # Install dependencies with UV
-uv pip install -r requirements.txt
+uv sync
 ```
 
 ## Step 2: Generate Sample Data (2 minutes)
@@ -234,7 +234,7 @@ This is **agentic AI** - Claude autonomously using tools to accomplish goals!
 **Solutions**:
 
 1. Ensure UV is installed: `uv --version`
-2. Reinstall: `uv pip install -r requirements.txt`
+2. Reinstall: `uv sync`
 3. Check Python version: `python3 --version` (needs 3.10+)
 4. Use `uv run server.py` instead of `python server.py`
 5. If using `python3` directly, make sure it points to Python 3.10+ with `mcp` installed
@@ -272,7 +272,7 @@ This is **agentic AI** - Claude autonomously using tools to accomplish goals!
 
 ```bash
 # Install dependencies
-uv pip install -r requirements.txt
+uv sync
 
 # Run server manually (should start without errors)
 uv run server.py

@@ -25,16 +25,21 @@ A practical guide and toolkit for learning how to build agentic AI applications 
 git clone https://github.com/yourusername/mcp-agentic-starter.git
 cd mcp-agentic-starter
 
-# Install UV (Python package manager)
-# Mac/Linux:
-brew install uv
-# Or visit: https://github.com/astral-sh/uv
+# Install UV (fast Python package manager)
+# macOS/Linux:
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies with UV
-uv pip install -r requirements.txt
+# Windows:
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# OR for Node.js examples
-npm install
+# Install all dependencies
+uv sync
+
+# Optional: Install visualization tools
+uv sync --extra viz
+
+# Optional: Install development tools (ruff, black, pytest)
+uv sync --extra dev
 ```
 
 ## 📚 Repository Structure

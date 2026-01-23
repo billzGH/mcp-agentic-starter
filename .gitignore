@@ -1,9 +1,15 @@
+# ============================================================================
 # Python
+# ============================================================================
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Distribution / packaging
 build/
 develop-eggs/
 dist/
@@ -22,7 +28,11 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual Environments
+# ============================================================================
+# Virtual Environments & Package Managers
+# ============================================================================
+
+# Virtual environments
 venv/
 env/
 ENV/
@@ -30,67 +40,103 @@ env.bak/
 venv.bak/
 .venv/
 
-# UV (Python package manager)
+# UV package manager
 .uv/
-uv.lock
+.python-version
 
-# MCP Server State
-*.state
-state/
-pipeline_state/
-tasks.json
+# Keep uv.lock committed for reproducibility (like package-lock.json)
+# uv.lock
 
-# Generated Sample Data - Users should generate their own
-datasets/sales/*.csv
-datasets/sales/*.json
-datasets/**/*.csv
-datasets/**/*.json
+# ============================================================================
+# Testing & Coverage
+# ============================================================================
 
-# Keep the README.md file
-!datasets/**/README.md
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Logs
-*.log
-logs/
-*.log.*
-
-# Testing
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
 .nox/
 
-# Jupyter Notebooks
-.ipynb_checkpoints
-*.ipynb
+# ============================================================================
+# IDEs & Editors
+# ============================================================================
 
-# Environment variables
-.env
-.env.local
-.env.*.local
+# VS Code
+.vscode/
+
+# JetBrains IDEs
+.idea/
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ============================================================================
+# Operating Systems
+# ============================================================================
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# ============================================================================
+# MCP & Project Specific
+# ============================================================================
+
+# MCP server state
+*.state
+state/
+pipeline_state/
+tasks.json
+
+# MCP logs
+*.log
+mcp*.log
+logs/
+*.log.*
 
 # Claude workspace files (from file-system server)
 claude-workspace/
 
-# Temporary files
-tmp/
-temp/
-*.tmp
+# Generated sample data - users should generate their own
+datasets/sales/*.csv
+datasets/sales/*.json
+datasets/**/*.csv
+datasets/**/*.json
 
-# Documentation builds
+# Keep README files in datasets
+!datasets/**/README.md
+
+# ============================================================================
+# Environment & Secrets
+# ============================================================================
+
+.env
+.env.local
+.env.*.local
+
+# ============================================================================
+# Jupyter Notebooks
+# ============================================================================
+
+.ipynb_checkpoints
+*.ipynb
+
+# ============================================================================
+# Documentation
+# ============================================================================
+
 docs/_build/
 site/
 
+# ============================================================================
 # Node.js (for any JS examples)
+# ============================================================================
+
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -98,17 +144,20 @@ yarn-error.log*
 package-lock.json
 yarn.lock
 
-# Database files
+# ============================================================================
+# Database Files
+# ============================================================================
+
 *.db
 *.sqlite
 *.sqlite3
 
-# Backup files
+# ============================================================================
+# Temporary & Backup Files
+# ============================================================================
+
+tmp/
+temp/
+*.tmp
 *.bak
 *.backup
-*~
-
-# OS files
-.DS_Store
-Thumbs.db
-desktop.ini
