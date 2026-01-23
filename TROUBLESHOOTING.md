@@ -213,7 +213,7 @@ uv pip list | grep mcp
 # Should show: mcp  1.24.0 (or similar)
 
 # 2. Reinstall
-uv pip install --force-reinstall mcp
+uv add --force-reinstall mcp
 
 # 3. Check Python version (needs 3.10+)
 uv run python --version
@@ -222,7 +222,7 @@ uv run python --version
 cd ~/git/mcp-agentic-starter
 rm -rf .venv
 uv venv
-uv pip install mcp
+uv add mcp
 
 # 5. Use uv run instead of python
 uv run server.py
@@ -236,10 +236,10 @@ uv run server.py
 
 ```bash
 # Install all dependencies
-uv pip install -r requirements.txt
+uv sync
 
 # Or install just what you need
-uv pip install mcp pandas numpy
+uv add mcp pandas numpy
 
 # Verify
 uv pip list
@@ -338,7 +338,7 @@ brew reinstall uv
 uv venv
 
 # 4. Install dependencies
-uv pip install mcp
+uv add mcp
 
 # 5. Test
 cd examples/data-analysis

@@ -25,7 +25,7 @@ brew install uv
 # Or visit: https://github.com/astral-sh/uv
 
 # Install dependencies with UV
-uv pip install -r requirements.txt
+uv sync
 
 # OR for Node.js examples
 npm install

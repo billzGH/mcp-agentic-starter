@@ -22,7 +22,7 @@ source .venv/bin/activate
 venv\Scripts\activate
 
 # Install dependencies
-uv pip install -r requirements.txt
+uv sync
 
 # 3. Generate sample data
 cd examples/data-analysis
