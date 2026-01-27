@@ -35,11 +35,20 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 # Install all dependencies
 uv sync
 
+# Optional: Install PostgreSQL support
+uv sync --extra postgres
+
+# Optional: Install FastAPI/mock API support
+uv sync --extra api
+
 # Optional: Install visualization tools
 uv sync --extra viz
 
 # Optional: Install development tools (ruff, black, pytest)
 uv sync --extra dev
+
+# Install all extras at once
+uv sync --all-extras
 ```
 
 ## 📚 Repository Structure
@@ -53,9 +62,9 @@ mcp-agentic-starter/
 │   └── 04-advanced-workflows.md
 ├── examples/               # Working MCP server examples
 │   ├── file-system/       # File operations server
-│   ├── database/          # SQLite database server
-│   ├── web-api/           # REST API integration
-│   └── data-analysis/     # Data processing server
+│   ├── data-analysis/     # CSV/JSON data processing
+│   ├── database/          # SQL database server (SQLite/PostgreSQL)
+│   └── web-api/           # REST API integration with mock server
 ├── datasets/              # Sample data for testing
 │   ├── sales/
 │   ├── customer-support/
@@ -92,16 +101,12 @@ Build a complete system where agents can create, track, and manage tasks across 
 
 ## 🔧 Included MCP Servers
 
-### Free & Open Source Servers
+1. **File System Server** - Read, write, search, and manage local files
+2. **Data Analysis Server** - Analyze CSV and JSON datasets with aggregations
+3. **Database Server** - Query SQL databases (SQLite local, PostgreSQL cloud)
+4. **Web API Server** - Integrate with REST APIs (includes mock API for testing)
 
-1. **SQLite Database Server** - Query and manage local databases
-2. **File System Server** - Read, write, and search files
-3. **CSV/JSON Processor** - Analyze structured data
-4. **Git Repository Server** - Interact with git repos
-5. **Weather Data Server** - Fetch weather information (using free APIs)
-6. **RSS Feed Reader** - Monitor and analyze RSS feeds
-
-All servers are designed to work with free/open-source tools and APIs.
+All servers include comprehensive documentation and work without paid API accounts.
 
 ## 📊 Sample Datasets
 
