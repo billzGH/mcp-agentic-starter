@@ -20,6 +20,8 @@ uv run python examples/file-system/server.py
 uv run python examples/data-analysis/server.py
 uv run python examples/database/server.py
 uv run python examples/web-api/server.py
+uv run python examples/task-manager/server.py
+uv run python examples/data-pipeline/server.py
 
 # Run the mock API server (required before using the web-api MCP server)
 uv run python examples/web-api/mock_api.py
@@ -34,8 +36,10 @@ uv run python examples/database/load_sample_data.py
 uv run ruff check .
 uv run black .
 
-# Run tests
-uv run pytest
+# Run tests (requires dev extras)
+uv sync --extra dev
+uv run pytest tests/ -v          # all 80 tests
+uv run pytest tests/test_pipeline.py -v  # single file
 ```
 
 ## Architecture
@@ -63,6 +67,8 @@ All tool calls return `List[TextContent]` and handle exceptions internally, retu
 - **data-analysis/server.py** — Loads CSV/JSON from `datasets/` and performs statistical analysis. Uses stdlib `statistics`, `csv`, `json` (no pandas dependency at runtime).
 - **database/server.py** — Wraps SQLite (default) or PostgreSQL via `DatabaseConnection` class. Configured via env vars: `DB_TYPE`, `DATABASE_URL`, `DB_READ_ONLY` (default: `true`), `DB_MAX_ROWS` (default: `1000`). Defaults to `examples/database/sample_data/sales.db`. Write tools are only registered when `DB_READ_ONLY=false`.
 - **web-api/server.py** — Calls a REST API via `APIClient` (httpx) with retry/backoff and in-process rate limiting. Configured via env vars: `API_BASE_URL` (default: `http://localhost:8000`), `API_KEY`, `REQUEST_TIMEOUT`, `MAX_RETRIES`. Requires the mock API server to be running.
+- **task-manager/server.py** — Persistent task list backed by `tasks.json` in the server directory. `TASKS_FILE` uses `Path(__file__).parent` so it resolves correctly regardless of working directory.
+- **data-pipeline/server.py** — Five-stage pipeline (INGESTION → VALIDATION → PROCESSING → ANALYSIS → REPORTING). State persisted as JSON between tool calls in `pipeline_state/`. Uses plain dicts (not dataclasses) to avoid Enum serialization issues.
 
 ### Supporting Files
 

@@ -22,7 +22,7 @@ A practical guide and toolkit for learning how to build agentic AI applications 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mcp-agentic-starter.git
+git clone https://github.com/your-username/mcp-agentic-starter.git
 cd mcp-agentic-starter
 
 # Install UV (fast Python package manager)
@@ -59,16 +59,19 @@ mcp-agentic-starter/
 │   ├── 01-mcp-basics.md
 │   ├── 02-first-server.md
 │   ├── 03-agentic-patterns.md
-│   └── 04-advanced-workflows.md
+│   ├── 04-advanced-workflows.md
+│   └── 05-testing-mcp-servers.md
 ├── examples/               # Working MCP server examples
 │   ├── file-system/       # File operations server
 │   ├── data-analysis/     # CSV/JSON data processing
 │   ├── database/          # SQL database server (SQLite/PostgreSQL)
-│   └── web-api/           # REST API integration with mock server
-├── datasets/              # Sample data for testing
-│   ├── sales/
-│   ├── customer-support/
-│   └── research-papers/
+│   ├── web-api/           # REST API integration with mock server
+│   ├── task-manager/      # Persistent task list server
+│   └── data-pipeline/     # Multi-stage data processing pipeline
+├── datasets/              # Synthetic datasets for practicing
+│   ├── sales/             # E-commerce transactions, customers, products
+│   └── customer-support/  # Support tickets with categories and sentiment
+├── tests/                 # Unit test suite (80 tests across all servers)
 ├── prompts/               # Effective prompts for agentic tasks
 └── projects/              # Complete project templates
 ```
@@ -105,20 +108,19 @@ Build a complete system where agents can create, track, and manage tasks across 
 2. **Data Analysis Server** - Analyze CSV and JSON datasets with aggregations
 3. **Database Server** - Query SQL databases (SQLite local, PostgreSQL cloud)
 4. **Web API Server** - Integrate with REST APIs (includes mock API for testing)
+5. **Task Manager Server** - Persistent task list with create, complete, and delete
+6. **Data Pipeline Server** - Multi-stage processing pipeline with state persistence
 
 All servers include comprehensive documentation and work without paid API accounts.
 
 ## 📊 Sample Datasets
 
-We include realistic, synthetic datasets for practicing:
+Realistic, synthetic datasets included for practicing:
 
-- **E-commerce**: 10K transactions, product catalog, customer data
-- **Customer Support**: 5K support tickets with resolutions
-- **Blog Content**: 500 articles with metadata and tags
-- **Research Papers**: 100 paper abstracts and citations
-- **Time Series**: Stock prices, weather data, web analytics
+- **E-commerce** (`datasets/sales/`): 10K transactions, 1K customers, 44 products across 5 categories
+- **Customer Support** (`datasets/customer-support/`): 1K support tickets with categories, priorities, sentiment scores, and resolution times
 
-All datasets are generated and free to use for learning.
+All datasets are generated with fixed random seeds for reproducibility and are free to use for learning.
 
 ## 🎓 Tutorials
 
@@ -138,6 +140,10 @@ Discover common patterns for building effective AI agents with tools.
 
 Create complex multi-step workflows with error handling and state management.
 
+### Tutorial 5: Testing MCP Servers (60 min)
+
+Write a unit test suite for MCP servers using pytest — async testing, mocking, and isolation patterns.
+
 ## 🌟 Real-World Projects
 
 Each project includes:
@@ -155,6 +161,17 @@ Each project includes:
 3. **Meeting Notes Analyzer** - Extracts action items and decisions
 4. **Content Repurposing Tool** - Transforms content between formats
 5. **Data Quality Checker** - Validates and cleans datasets
+
+## 🧪 Test Suite
+
+The project includes 80 unit tests covering all example servers:
+
+```bash
+uv sync --extra dev
+uv run pytest tests/ -v
+```
+
+Tests cover business logic directly (no MCP framework mocking needed) and run in under 2 seconds. See [Tutorial 5](tutorials/05-testing-mcp-servers.md) for a full walkthrough of the testing approach.
 
 ## 🤝 Contributing
 
