@@ -28,6 +28,7 @@ api = [
 ]
 dev = [
     "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
     "black>=23.0.0",
     "ruff>=0.0.280",
 ]
@@ -42,6 +43,9 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W"]
 ignore = []
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 
 [tool.black]
 line-length = 100
