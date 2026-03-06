@@ -20,9 +20,13 @@ server = Server("data-analysis")
 
 class DataAnalyzer:
     """Analyze CSV and JSON data files"""
-    
-    def __init__(self, data_dir: str = "../../datasets"):
-        self.data_dir = Path(data_dir)
+
+    def __init__(self, data_dir: str = None):
+        if data_dir is None:
+            # Default to datasets/ at the repo root, regardless of working directory
+            self.data_dir = Path(__file__).parent.parent.parent / "datasets"
+        else:
+            self.data_dir = Path(data_dir)
     
     def list_files(self) -> List[Dict[str, Any]]:
         """List available data files"""
