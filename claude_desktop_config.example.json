@@ -1,0 +1,63 @@
+{
+  "_readme": "Copy this file to ~/Library/Application Support/Claude/claude_desktop_config.json (Mac) or %APPDATA%\\Claude\\claude_desktop_config.json (Windows). Replace /absolute/path/to with the actual path to this repo on your machine. You do not need to enable all servers — include only the ones you want to use.",
+  "mcpServers": {
+    "filesystem": {
+      "_readme": "Lets Claude read/write files in ~/Documents/claude-workspace. No extra setup needed.",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/mcp-agentic-starter/examples/file-system",
+        "server.py"
+      ]
+    },
+    "data-analysis": {
+      "_readme": "Lets Claude analyze CSV/JSON files in datasets/. Run 'uv run examples/data-analysis/generate_sales_data.py' first to generate sample data.",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/mcp-agentic-starter/examples/data-analysis",
+        "server.py"
+      ]
+    },
+    "database": {
+      "_readme": "Lets Claude query SQLite (default) or PostgreSQL. Run 'uv run examples/database/load_sample_data.py' first to create the sample SQLite database.",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/mcp-agentic-starter/examples/database",
+        "server.py"
+      ],
+      "env": {
+        "DB_TYPE": "sqlite",
+        "DB_READ_ONLY": "true"
+      }
+    },
+    "web-api": {
+      "_readme": "Lets Claude call the e-commerce/analytics REST API. Start the mock API first in a separate terminal: 'uv run examples/web-api/mock_api.py'",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/mcp-agentic-starter/examples/web-api",
+        "server.py"
+      ],
+      "env": {
+        "API_BASE_URL": "http://localhost:8000",
+        "API_KEY": "test_api_key"
+      }
+    },
+    "task-manager": {
+      "_readme": "Lets Claude manage a persistent task list. No extra setup needed.",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/mcp-agentic-starter/examples/task-manager",
+        "server.py"
+      ]
+    }
+  }
+}
