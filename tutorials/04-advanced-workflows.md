@@ -626,7 +626,65 @@ asyncio.run(load_test())
 
 ## Real-World Example: Data Pipeline
 
-Let's build a complete production-ready pipeline:
+The complete, runnable implementation lives at **[examples/data-pipeline/server.py](../examples/data-pipeline/server.py)**.
+
+It processes `datasets/sales/transactions.csv` through five stages — ingestion, validation, processing, analysis, and reporting — producing a formatted markdown report. Run the generator first if you haven't:
+
+```bash
+uv run examples/data-analysis/generate_sales_data.py
+```
+
+Then add `examples/data-pipeline/server.py` to your Claude Desktop config and try:
+
+```plaintext
+Start a pipeline called "sales-2024" on datasets/sales/transactions.csv
+```
+
+```plaintext
+Continue the sales-2024 pipeline
+```
+
+_(repeat until REPORTING completes — each call advances one stage)_
+
+### Key patterns in the implementation
+
+**State is a plain dict serialized to JSON** — avoids the `dataclasses.asdict` + Enum serialization pitfall. Each stage stores its summary under a named key in `state["results"]`:
+
+```python
+state["results"]["validation"] = {
+    "quality_score": 98.5,
+    "issues": ["15 records with negative total_amount"],
+}
+```
+
+**Stage functions are plain async functions, not methods** — easier to test individually:
+
+```python
+async def _validate(state: dict) -> dict:
+    rows = load_csv(resolve_path(state["input_file"]))
+    # ... validation logic ...
+    state["results"]["validation"] = {...}
+    next_stage(state)
+    return state
+```
+
+**`save_state` strips large intermediate data** before persisting — keeps checkpoint files small:
+
+```python
+def save_state(self, state: dict) -> None:
+    slim_results = {k: v for k, v in state["results"].items() if k != "report"}
+    # report_text is large — only persist the path
+    ...
+```
+
+See [examples/data-pipeline/README.md](../examples/data-pipeline/README.md) for setup and extension ideas.
+
+---
+
+<!-- The original tutorial snippet below is preserved for reference.
+     Note the two bugs in the original: missing `import json` and
+     missing `from dataclasses import asdict`. The working example
+     avoids both by using a plain dict for state. -->
 
 ```python
 #!/usr/bin/env python3
@@ -635,11 +693,12 @@ Production-ready data analysis pipeline
 """
 
 import asyncio
+import json                          # ← was missing in tutorial
 import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict   # ← asdict was missing
 from enum import Enum
 
 from mcp.server import Server
