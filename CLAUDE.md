@@ -81,3 +81,13 @@ All tool calls return `List[TextContent]` and handle exceptions internally, retu
 ### Adding a New MCP Server
 
 New servers belong in `examples/your-server/` and should include `server.py`, `README.md`, and optionally `test_prompts.md`. Follow the existing tool registration pattern and run via stdio transport.
+
+## Contributing
+
+### Pull Requests
+
+Always use the template at `.github/pull_request_template.md` when opening PRs. Use feature branches (`feature/...`) for new functionality and `fix/...` for bug fixes — never commit directly to `main`.
+
+### Claude Desktop Config
+
+`claude_desktop_config.example.json` at the repo root shows how to wire up all servers. Copy it to the Claude Desktop config location and replace `/absolute/path/to` with the actual repo path.
