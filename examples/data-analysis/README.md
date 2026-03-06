@@ -39,9 +39,9 @@ Add to your Claude Desktop config:
     "data-analysis": {
       "command": "uv",
       "args": [
+        "run",
         "--directory",
         "/absolute/path/to/examples/data-analysis",
-        "run",
         "server.py"
       ]
     }
@@ -57,9 +57,9 @@ Add to your Claude Desktop config:
     "data-analysis": {
       "command": "uv",
       "args": [
+        "run",
         "--directory",
         "C:\\absolute\\path\\to\\examples\\data-analysis",
-        "run",
         "server.py"
       ]
     }

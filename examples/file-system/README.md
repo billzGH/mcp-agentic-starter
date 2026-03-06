@@ -44,8 +44,13 @@ Add to your Claude Desktop config:
 {
   "mcpServers": {
     "filesystem": {
-      "command": "python",
-      "args": ["/absolute/path/to/examples/file-system/server.py"]
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/examples/file-system",
+        "server.py"
+      ]
     }
   }
 }

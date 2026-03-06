@@ -58,6 +58,16 @@
         "/absolute/path/to/mcp-agentic-starter/examples/task-manager",
         "server.py"
       ]
+    },
+    "data-pipeline": {
+      "_readme": "Lets Claude run a multi-stage data processing pipeline. Run 'uv run examples/data-analysis/generate_sales_data.py' first to generate the sales dataset.",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/mcp-agentic-starter/examples/data-pipeline",
+        "server.py"
+      ]
     }
   }
 }
