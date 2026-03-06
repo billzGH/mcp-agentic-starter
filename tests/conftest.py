@@ -51,6 +51,11 @@ def web_api_mod():
     return load_example_module("web-api", "web_api_server")
 
 
+@pytest.fixture(scope="session")
+def pipeline_mod():
+    return load_example_module("data-pipeline", "data_pipeline_server")
+
+
 # ---------------------------------------------------------------------------
 # Data fixtures
 # ---------------------------------------------------------------------------
