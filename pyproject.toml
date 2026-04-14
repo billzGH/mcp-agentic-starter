@@ -27,7 +27,7 @@ api = [
     "uvicorn>=0.24.0",
 ]
 dev = [
-    "pytest>=7.4.0",
+    "pytest>=9.0.3",
     "pytest-asyncio>=0.23.0",
     "black>=23.0.0",
     "ruff>=0.0.280",
